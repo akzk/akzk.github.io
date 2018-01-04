@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="神经网络,机器学习," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="http://assets-cdn.github.com/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="概要BP（back propagation）神经网络，是机器学习领域神经网络部分的首要入门项，其中最为关键的反向传播（即BP的中文概念）是所有神经网络实现的基础。关于神经网络的历史，可参考其他文章，本文不再赘述，直接切入主题。 首先，什么是神经网络？即由多层神经元层排列、相邻层神经元之间全连接而组成的网络结构，将一个BP神经网络模型保存为一个文件时，保存的只是个三维数组，三维分别用i、j、k三值表">
+<meta name="keywords" content="神经网络,机器学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BP神经网络">
+<meta property="og:url" content="http://akzk.github.io/2017/10/31/BP神经网络/index.html">
+<meta property="og:site_name" content="akzk&#39;s blog">
+<meta property="og:description" content="概要BP（back propagation）神经网络，是机器学习领域神经网络部分的首要入门项，其中最为关键的反向传播（即BP的中文概念）是所有神经网络实现的基础。关于神经网络的历史，可参考其他文章，本文不再赘述，直接切入主题。 首先，什么是神经网络？即由多层神经元层排列、相邻层神经元之间全连接而组成的网络结构，将一个BP神经网络模型保存为一个文件时，保存的只是个三维数组，三维分别用i、j、k三值表">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-11-05T09:16:03.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BP神经网络">
+<meta name="twitter:description" content="概要BP（back propagation）神经网络，是机器学习领域神经网络部分的首要入门项，其中最为关键的反向传播（即BP的中文概念）是所有神经网络实现的基础。关于神经网络的历史，可参考其他文章，本文不再赘述，直接切入主题。 首先，什么是神经网络？即由多层神经元层排列、相邻层神经元之间全连接而组成的网络结构，将一个BP神经网络模型保存为一个文件时，保存的只是个三维数组，三维分别用i、j、k三值表">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://akzk.github.io/2017/10/31/BP神经网络/"/>
+
+
+
+
+
+  <title>BP神经网络 | akzk's blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">akzk's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">赤い彗星</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://akzk.github.io/2017/10/31/BP神经网络/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="akzk">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://tva3.sinaimg.cn/crop.0.0.1080.1080.180/9433c2d8jw8ek6q4u0kcvj20u00u0jte.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="akzk's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">BP神经网络</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-31T13:45:59+08:00">
+                2017-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/代码/" itemprop="url" rel="index">
+                    <span itemprop="name">代码</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p><strong>BP（back propagation）神经网络</strong>，是机器学习领域神经网络部分的首要入门项，其中最为关键的<strong>反向传播</strong>（即BP的中文概念）是所有神经网络实现的基础。关于神经网络的历史，可参考其他文章，本文不再赘述，直接切入主题。</p>
+<p>首先，什么是<strong>神经网络</strong>？即由多层神经元层排列、相邻层神经元之间全连接而组成的网络结构，将一个BP神经网络模型保存为一个文件时，保存的只是个三维数组，三维分别用i、j、k三值表示，i表示层，j、k共同表示从上一层第k个神经元到该层第j个神经元的权重值，为浮点数。</p>
+<a id="more"></a>
+<p>然后，神经网络有什么作用？和机器学习的作用一样，就是分类和回归。分类顾名即可思义；回归可以用一个例子理解，对带噪音频进行去噪，得到干净的音频，这算是一种回归行为，即得到的是连续序列。</p>
+<p>下一步是，怎么使用神经网络？分为<strong>训练</strong>和<strong>应用</strong>两步。这两步里涉及到两个过程，正向传播和反向传播。</p>
+<p><strong>正向传播</strong>，就是使输入序列在神经网络上，按连接线的路径一路使用权重值进行运算，最后在末尾得到预测序列。</p>
+<p><strong>反向传播</strong>，就是使用预测序列和目标序列代入代价函数，使用梯度下降的策略，利用代价函数导数对神经网络的所有权重值从尾到头进行更新。</p>
+<p>训练时，对已赋初值的神经网络，按序进行正向传播和反向传播两个过程，以将神经网络更新到正向传播的输出最接近目标序列。</p>
+<p>应用时，只会使用正向传播，得到输出，该输出就是我们的目的所在。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BP</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, learn_rate=<span class="number">0.01</span>, iter_num=<span class="number">1000</span>)</span>:</span></span><br><span class="line">        self.model = []                 <span class="comment"># 三维数组，仅含隐含层、输出层。1: 层数; 2: 当前层神经元序号; 3: 上一层神经元序号</span></span><br><span class="line">        self.funcs = []                 <span class="comment"># 一维数组</span></span><br><span class="line">        self.learn_rate = learn_rate    <span class="comment"># 训练速度</span></span><br><span class="line">        self.iter_num = iter_num        <span class="comment"># 迭代次数</span></span><br><span class="line"></span><br><span class="line">        plt.ion()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_layer</span><span class="params">(self, in_num, out_num, init_weight=<span class="number">0.01</span>, init_bias=<span class="number">0.01</span>, activation_func=None)</span>:</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 初始化神经网络模型，即weight、bias组成的二维数组</span></span><br><span class="line">        layer = np.array([[init_weight <span class="keyword">for</span> _ <span class="keyword">in</span> range(in_num+<span class="number">1</span>)] <span class="keyword">for</span> _ <span class="keyword">in</span> range(out_num)])</span><br><span class="line">        <span class="keyword">for</span> cur <span class="keyword">in</span> layer:</span><br><span class="line">            cur[<span class="number">-1</span>] = init_bias</span><br><span class="line"></span><br><span class="line">        self.model.append(layer)</span><br><span class="line">        self.funcs.append(activation_func)</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">train</span><span class="params">(self, x, y)</span>:</span></span><br><span class="line">        model = self.model</span><br><span class="line">        funcs = self.funcs</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 创建二维数组，记录每层每个神经元的输出，重写于正向传播，使用于反向传播</span></span><br><span class="line">        n_layers = len(model)</span><br><span class="line">        out = []                        <span class="comment"># 每层每个神经元的输出</span></span><br><span class="line">        out.append(np.copy(x))          <span class="comment"># 输入层的输出</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(n_layers):</span><br><span class="line">            n_units = len(model[i])     <span class="comment"># 该层神经元数</span></span><br><span class="line">            out.append(np.array([<span class="number">0.0</span> <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_units)]))</span><br><span class="line"></span><br><span class="line">        iter_num = self.iter_num</span><br><span class="line">        progress = <span class="number">-1</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, iter_num+<span class="number">1</span>): <span class="comment"># 训练iter_num次</span></span><br><span class="line"></span><br><span class="line">            self.forward(x, out)    <span class="comment"># 正向传播</span></span><br><span class="line">            self.back(y, out)       <span class="comment"># 反向传播</span></span><br><span class="line"></span><br><span class="line">            tmp_progress = int(i * <span class="number">100</span> / iter_num)</span><br><span class="line">            <span class="keyword">if</span> tmp_progress &gt; progress:             <span class="comment"># 进度进行每至少1%打印一次当前cost</span></span><br><span class="line">                progress = tmp_progress</span><br><span class="line">                print(<span class="string">"progress: %d %%, cost: %f"</span> % (progress, self.get_cost(x, y, out)))</span><br><span class="line"></span><br><span class="line">                plt.cla()</span><br><span class="line">                plt.plot(y)</span><br><span class="line">                plt.plot(out[<span class="number">-1</span>])</span><br><span class="line">                plt.pause(<span class="number">0.001</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 正向传播，得到预测序列</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x, out)</span>:</span></span><br><span class="line">        model = self.model</span><br><span class="line">        funcs = self.funcs</span><br><span class="line"></span><br><span class="line">        x_ = np.copy(x)</span><br><span class="line">        <span class="keyword">for</span> i, layer <span class="keyword">in</span> enumerate(model):   <span class="comment"># 遍历神经网络的每一层</span></span><br><span class="line">            x_ = np.concatenate((x_, np.array([<span class="number">1.0</span>])), axis=<span class="number">0</span>) <span class="comment"># because of bias</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> j, wbs <span class="keyword">in</span> enumerate(layer): <span class="comment"># 遍历每层的每个神经元，与每个神经元相关的是分别在前后连接的权重</span></span><br><span class="line">                tmp = np.dot(x_, wbs)       <span class="comment"># 临时变量，每个神经元的输出，下一层的输入。矩阵点乘法则恰好符合运算需求</span></span><br><span class="line">                <span class="keyword">if</span> funcs[i] != <span class="keyword">None</span>:        <span class="comment"># 激活函数</span></span><br><span class="line">                    tmp = funcs[i](tmp)</span><br><span class="line">                out[i+<span class="number">1</span>][j] = tmp</span><br><span class="line">            </span><br><span class="line">            x_ = out[i+<span class="number">1</span>] <span class="comment"># +1原因: model数组不包括输入层，out数组包括输入层</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 计算损失，通过正向传播</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_cost</span><span class="params">(self, x, y, out)</span>:</span></span><br><span class="line">        self.forward(x, out)</span><br><span class="line">        cost = np.sum(np.square(out[<span class="number">-1</span>] - y) / <span class="number">2</span>)</span><br><span class="line">        <span class="keyword">return</span> cost</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 反向传播，更新权重</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">back</span><span class="params">(self, y, out)</span>:</span></span><br><span class="line"></span><br><span class="line">        model = self.model</span><br><span class="line">        funcs = self.funcs</span><br><span class="line">        lr = self.learn_rate</span><br><span class="line"></span><br><span class="line">        isOutputLayer = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(model)<span class="number">-1</span>, <span class="number">-1</span>, <span class="number">-1</span>):   <span class="comment"># 倒序遍历所有神经元层，“反向”为此意</span></span><br><span class="line">            t = i+<span class="number">1</span>     <span class="comment"># 第i层的输出，编号t；第i层的输入，编号i</span></span><br><span class="line"></span><br><span class="line">            y_ = out[t] <span class="comment"># 该层的输出</span></span><br><span class="line">            x_ = out[i] <span class="comment"># 该层的输入</span></span><br><span class="line"></span><br><span class="line">            x_ = np.concatenate((x_, np.array([<span class="number">1.0</span>])), axis=<span class="number">0</span>)  <span class="comment"># 加上因为bias的特殊处理</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> j, _ <span class="keyword">in</span> enumerate(model[i]):    <span class="comment"># 遍历该层所有神经元</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> isOutputLayer:</span><br><span class="line">                    e = [y - out[<span class="number">-1</span>]]       <span class="comment"># 输出层的alter值e部分的计算不同于隐含层，e为随意命名</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    e = [model[i][j] * g]</span><br><span class="line"></span><br><span class="line">                g = funcs[i](y_[j], <span class="keyword">True</span>) * sum(e)[j]</span><br><span class="line">                alter = lr * (g * x_)       <span class="comment"># weight、bias的改变值。(g * x_)为负梯度，利用梯度下降的思想对权重进行更新。</span></span><br><span class="line">                                            <span class="comment"># 默认使用最小二乘为损失函数，若更换损失函数，将相应逻辑更替(g * x_)即可</span></span><br><span class="line"></span><br><span class="line">                model[i][j] += alter</span><br><span class="line">            </span><br><span class="line">            isOutputLayer = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 激活函数sigmoid，反向传播时传入输出序列，正向传播时传入输入序列</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sigmoid</span><span class="params">(self, x, isBack=False)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> isBack:</span><br><span class="line">            <span class="keyword">return</span> x * (<span class="number">1</span> - x)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + np.exp(-x))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    x = np.linspace(<span class="number">1</span>, <span class="number">10</span>, <span class="number">30</span>)</span><br><span class="line">    y = (np.sin(x) + <span class="number">1</span>) / <span class="number">2</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 训练</span></span><br><span class="line">    nn = BP(learn_rate=<span class="number">0.01</span>, iter_num=<span class="number">1000</span>)</span><br><span class="line">    nn.add_layer(<span class="number">30</span>, <span class="number">30</span>, activation_func=nn.sigmoid)</span><br><span class="line">    nn.add_layer(<span class="number">30</span>, <span class="number">30</span>, activation_func=nn.sigmoid)</span><br><span class="line">    nn.train(x, y)</span><br></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><ol>
+<li>《机器学习》周志华 P97</li>
+</ol>
+<h3 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h3><ol>
+<li><p><a href="https://zhuanlan.zhihu.com/p/27449596" target="_blank" rel="noopener">一文看懂各种神经网络优化算法:从梯度下降到Adam方法</a></p>
+</li>
+<li><p><a href="https://zhuanlan.zhihu.com/p/27297638" target="_blank" rel="noopener">五步解析机器学习难点—梯度下降</a></p>
+</li>
+</ol>
+<p>   ​    </p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/神经网络/" rel="tag"># 神经网络</a>
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/27/Sphinx全文检索/" rel="next" title="Sphinx全文检索">
+                <i class="fa fa-chevron-left"></i> Sphinx全文检索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/10/docker-hadoop/" rel="prev" title="使用Docker快速搭建Hadoop环境">
+                使用Docker快速搭建Hadoop环境 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://tva3.sinaimg.cn/crop.0.0.1080.1080.180/9433c2d8jw8ek6q4u0kcvj20u00u0jte.jpg"
+               alt="akzk" />
+          <p class="site-author-name" itemprop="name">akzk</p>
+           
+              <p class="site-description motion-element" itemprop="description">世界は広いです</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/akzk/" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码实现"><span class="nav-number">2.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#神经网络"><span class="nav-number">3.1.</span> <span class="nav-text">神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#梯度下降"><span class="nav-number">3.2.</span> <span class="nav-text">梯度下降</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">akzk</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

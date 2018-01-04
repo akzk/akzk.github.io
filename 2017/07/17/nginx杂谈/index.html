@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="nginx,网络模型," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="http://assets-cdn.github.com/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="基础知识同步异步&amp;amp;阻塞非阻塞处理请求的过程可以分为两个时间阶段，等待数据、拷贝数据，见图。  同步与异步：应用进程在两个时间阶段都没有阻塞，即为异步，否则，为同步。 阻塞与非阻塞：执行read/recv时，函数是否立即返回，无论数据有无。是则非阻塞，否则阻塞。">
+<meta name="keywords" content="nginx,网络模型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx杂谈">
+<meta property="og:url" content="http://akzk.github.io/2017/07/17/nginx杂谈/index.html">
+<meta property="og:site_name" content="akzk&#39;s blog">
+<meta property="og:description" content="基础知识同步异步&amp;amp;阻塞非阻塞处理请求的过程可以分为两个时间阶段，等待数据、拷贝数据，见图。  同步与异步：应用进程在两个时间阶段都没有阻塞，即为异步，否则，为同步。 阻塞与非阻塞：执行read/recv时，函数是否立即返回，无论数据有无。是则非阻塞，否则阻塞。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216532_9745.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/7d3eb389b7724878bd7e12ebc6dbcdb5_b.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216532_9745.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216607_3004.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216620_6310.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216632_6025.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216641_7821.jpg">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/12/1334216724_2405.jpg">
+<meta property="og:image" content="http://tengine.taobao.org/book/_images/chapter-2-1.PNG">
+<meta property="og:image" content="http://tengine.taobao.org/book/_images/chapter-2-2.PNG">
+<meta property="og:updated_time" content="2017-07-23T11:31:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nginx杂谈">
+<meta name="twitter:description" content="基础知识同步异步&amp;amp;阻塞非阻塞处理请求的过程可以分为两个时间阶段，等待数据、拷贝数据，见图。  同步与异步：应用进程在两个时间阶段都没有阻塞，即为异步，否则，为同步。 阻塞与非阻塞：执行read/recv时，函数是否立即返回，无论数据有无。是则非阻塞，否则阻塞。">
+<meta name="twitter:image" content="http://my.csdn.net/uploads/201204/12/1334216532_9745.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://akzk.github.io/2017/07/17/nginx杂谈/"/>
+
+
+
+
+
+  <title>nginx杂谈 | akzk's blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">akzk's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">赤い彗星</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://akzk.github.io/2017/07/17/nginx杂谈/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="akzk">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://tva3.sinaimg.cn/crop.0.0.1080.1080.180/9433c2d8jw8ek6q4u0kcvj20u00u0jte.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="akzk's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">nginx杂谈</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-17T11:26:25+08:00">
+                2017-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/杂谈/" itemprop="url" rel="index">
+                    <span itemprop="name">杂谈</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="同步异步-amp-阻塞非阻塞"><a href="#同步异步-amp-阻塞非阻塞" class="headerlink" title="同步异步&amp;阻塞非阻塞"></a>同步异步&amp;阻塞非阻塞</h3><p>处理请求的过程可以分为两个时间阶段，<strong>等待数据</strong>、<strong>拷贝数据</strong>，见图。</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216532_9745.jpg" alt=""></p>
+<p>同步与异步：应用进程在两个时间阶段都没有阻塞，即为异步，否则，为同步。</p>
+<p>阻塞与非阻塞：执行read/recv时，函数是否立即返回，无论数据有无。是则非阻塞，否则阻塞。</p>
+<p><img src="https://pic2.zhimg.com/7d3eb389b7724878bd7e12ebc6dbcdb5_b.jpg" alt=""></p>
+<a id="more"></a>
+<h3 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h3><h4 id="阻塞式"><a href="#阻塞式" class="headerlink" title="阻塞式"></a>阻塞式</h4><p>为<strong>同步</strong>模型，最容易实现的模型，易理解，见图</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216532_9745.jpg" alt=""></p>
+<h4 id="非阻塞式"><a href="#非阻塞式" class="headerlink" title="非阻塞式"></a>非阻塞式</h4><p>为<strong>同步</strong>模型，在阻塞式模型的原有基础上，将socket设定为非阻塞即可，原理见图</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216607_3004.jpg" alt=""></p>
+<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p>又名<strong>事件驱动</strong>，为<strong>同步</strong>模型，高性能服务器中常用的模型，相关联的函数有select、poll、<strong>epoll</strong>，原理见图</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216620_6310.jpg" alt=""></p>
+<h4 id="信号驱动"><a href="#信号驱动" class="headerlink" title="信号驱动"></a>信号驱动</h4><p>为<strong>同步</strong>模型，调用立即返回，结果交由指定处理函数负责处理，原理见图</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216632_6025.jpg" alt=""></p>
+<h4 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h4><p>如名，<strong>异步</strong>模型，aio_read时指定了输入流与输出流，数据读写完全由内核完成，在该读写进行时用户程序不会阻塞，可以执行其他事务，读写完成的信息可调用aio_return得到</p>
+<p><img src="http://my.csdn.net/uploads/201204/12/1334216641_7821.jpg" alt=""></p>
+<h4 id="各模型对比"><a href="#各模型对比" class="headerlink" title="各模型对比"></a>各模型对比</h4><p><img src="http://my.csdn.net/uploads/201204/12/1334216724_2405.jpg" alt=""></p>
+<h4 id="多路复用函数对比"><a href="#多路复用函数对比" class="headerlink" title="多路复用函数对比"></a>多路复用函数对比</h4><p>FD，文件描述符</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>select</th>
+<th>poll</th>
+<th>epoll</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单进程FD上限</td>
+<td>1024（32位）/2048（64位）</td>
+<td>无上限</td>
+<td>无上限</td>
+</tr>
+<tr>
+<td>遍历效率（检查事件）</td>
+<td>线性下降（自行遍历）</td>
+<td>线性下降（自行遍历）</td>
+<td>不变，epll_wait返回已就绪FD列表</td>
+</tr>
+<tr>
+<td>FD列表拷贝</td>
+<td>每次select</td>
+<td>每次poll</td>
+<td>epoll_ctl时才发生</td>
+</tr>
+</tbody>
+</table>
+<h2 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>俄国人Igor Sysoev开发并开源，于2004年发布版本0.1.0。</p>
+<p>特点在于并发性能好、资源占用少，一般用作反向代理服务器、HTTP服务器，支持植入模块，从1.9.11开始支持<strong>动态模块</strong>。</p>
+<p><img src="http://tengine.taobao.org/book/_images/chapter-2-1.PNG" alt=""></p>
+<p>nginx以<strong>epoll</strong>＋<strong>多进程</strong>模式（见上图）为人所知，每个工作进程中仅一个线程在运行，这也是nginx的基础，自0.8.11后，引入了<strong>AIO</strong>（默认关闭），以提高大文件(大于512k)的读取发送效率；自1.7.11后，为read()、sendfile()、aio_write()（在1.9.13支持）引入了<strong>线程池</strong>（默认关闭），理论上线程池适合任何可能阻塞工作进程的任务。</p>
+<p>综上，在服务器常用手段中，nginx与apache一样使用了多进程、线程池（虽然两者使用目的不一样），在网络模型方面，nginx使用了多路复用（epoll）与异步（AIO）模型。</p>
+<h3 id="HTTP请求处理流程"><a href="#HTTP请求处理流程" class="headerlink" title="HTTP请求处理流程"></a>HTTP请求处理流程</h3><p><img src="http://tengine.taobao.org/book/_images/chapter-2-2.PNG" alt=""></p>
+<h3 id="衍生物"><a href="#衍生物" class="headerlink" title="衍生物"></a>衍生物</h3><h4 id="tengine"><a href="#tengine" class="headerlink" title="tengine"></a>tengine</h4><p>淘宝团队对nginx进行大量改造，并于2011年开源，早于nginx支持动态模块，并针对淘宝业务对nginx进行关键部分的优化。</p>
+<h4 id="openresty"><a href="#openresty" class="headerlink" title="openresty"></a>openresty</h4><p>原淘宝工程师章亦春对nginx进行改造，并于2011年开源，在nginx基础上支持Lua脚本，并集成大量优秀Lua库，方便于搭建高性能的动态Web服务</p>
+<h3 id="模块开发-C-language"><a href="#模块开发-C-language" class="headerlink" title="模块开发(C language)"></a>模块开发(C language)</h3><p>使用C语言针对业务开发nginx模块，适合于简单、高频的业务，如广告转跳。有3种模块供开发者开发，handler、filter、load-balancer。handler为最常开发的模块，接受请求并产生输出。handler模块的处理结果有3种，成功、失败、拒绝，拒绝可以使该请求改由默认的其他模块处理。</p>
+<p>具体开发细节另开专题。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>《Unix网络编程》</p>
+<p><a href="http://blog.csdn.net/pi9nc/article/details/11975667" target="_blank" rel="noopener">http://blog.csdn.net/pi9nc/article/details/11975667</a></p>
+<p><a href="http://tengine.taobao.org/book/chapter_02.html" target="_blank" rel="noopener">http://tengine.taobao.org/book/chapter_02.html</a></p>
+<p><a href="http://blog.csdn.net/zhxue123/article/details/21087165" target="_blank" rel="noopener">http://blog.csdn.net/zhxue123/article/details/21087165</a></p>
+<p><a href="https://www.nginx.com/blog/thread-pools-boost-performance-9x/" target="_blank" rel="noopener">https://www.nginx.com/blog/thread-pools-boost-performance-9x/</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+            <a href="/tags/网络模型/" rel="tag"># 网络模型</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/17/nginx动态模块开发-C-language/" rel="prev" title="nginx动态模块开发(C language)">
+                nginx动态模块开发(C language) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://tva3.sinaimg.cn/crop.0.0.1080.1080.180/9433c2d8jw8ek6q4u0kcvj20u00u0jte.jpg"
+               alt="akzk" />
+          <p class="site-author-name" itemprop="name">akzk</p>
+           
+              <p class="site-description motion-element" itemprop="description">世界は広いです</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/akzk/" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础知识"><span class="nav-number">1.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同步异步-amp-阻塞非阻塞"><span class="nav-number">1.1.</span> <span class="nav-text">同步异步&amp;阻塞非阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络模型"><span class="nav-number">1.2.</span> <span class="nav-text">网络模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞式"><span class="nav-number">1.2.1.</span> <span class="nav-text">阻塞式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非阻塞式"><span class="nav-number">1.2.2.</span> <span class="nav-text">非阻塞式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多路复用"><span class="nav-number">1.2.3.</span> <span class="nav-text">多路复用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#信号驱动"><span class="nav-number">1.2.4.</span> <span class="nav-text">信号驱动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#异步"><span class="nav-number">1.2.5.</span> <span class="nav-text">异步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#各模型对比"><span class="nav-number">1.2.6.</span> <span class="nav-text">各模型对比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多路复用函数对比"><span class="nav-number">1.2.7.</span> <span class="nav-text">多路复用函数对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx"><span class="nav-number">2.</span> <span class="nav-text">nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">2.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP请求处理流程"><span class="nav-number">2.2.</span> <span class="nav-text">HTTP请求处理流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#衍生物"><span class="nav-number">2.3.</span> <span class="nav-text">衍生物</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tengine"><span class="nav-number">2.3.1.</span> <span class="nav-text">tengine</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#openresty"><span class="nav-number">2.3.2.</span> <span class="nav-text">openresty</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模块开发-C-language"><span class="nav-number">2.4.</span> <span class="nav-text">模块开发(C language)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">akzk</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
