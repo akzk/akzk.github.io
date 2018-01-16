@@ -77,7 +77,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="算法," />
+  <meta name="keywords" content="spark,分布式," />
 
 
 
@@ -93,18 +93,18 @@
 
 
 
-<meta name="description" content="简述单向链表快速排序与数组快速排序$^1$有所不同，关键部分中，数组快速排序有不断向前的下标访问，这种方式对于双向链表来说可行，但对于单向链表来说，每次访问都会导致大量解引用行为，因此需要对方案进行适度的修改。 单向链表快速排序有两种方案，改变值、改变指针，改变值的方案在节点结构体包含大量变量内容的情况下会造成性能大幅下降，故选择后者。   见《数据结构与算法分析——C语言描述（第二版）》177页">
-<meta name="keywords" content="算法">
+<meta name="description" content="前言使用Docker在Mac上快速部署Spark运行环境，便于本地代码测试 安装 前提  Mac OS Docker    下载镜像 1docker pull akzk/spark_py34:mac  下载脚本 123wget https://github.com/akzk/dockerhub/archive/master.zipunzip master.zipcd dockerhub-maste">
+<meta name="keywords" content="spark,分布式">
 <meta property="og:type" content="article">
-<meta property="og:title" content="单向链表快速排序">
-<meta property="og:url" content="http://akzk.github.io/2017/07/25/单向链表快速排序/index.html">
+<meta property="og:title" content="Spark快速入门">
+<meta property="og:url" content="http://akzk.github.io/2018/01/15/Spark入门/index.html">
 <meta property="og:site_name" content="akzk&#39;s blog">
-<meta property="og:description" content="简述单向链表快速排序与数组快速排序$^1$有所不同，关键部分中，数组快速排序有不断向前的下标访问，这种方式对于双向链表来说可行，但对于单向链表来说，每次访问都会导致大量解引用行为，因此需要对方案进行适度的修改。 单向链表快速排序有两种方案，改变值、改变指针，改变值的方案在节点结构体包含大量变量内容的情况下会造成性能大幅下降，故选择后者。   见《数据结构与算法分析——C语言描述（第二版）》177页">
+<meta property="og:description" content="前言使用Docker在Mac上快速部署Spark运行环境，便于本地代码测试 安装 前提  Mac OS Docker    下载镜像 1docker pull akzk/spark_py34:mac  下载脚本 123wget https://github.com/akzk/dockerhub/archive/master.zipunzip master.zipcd dockerhub-maste">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-07-26T18:47:25.000Z">
+<meta property="og:updated_time" content="2018-01-16T01:22:18.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="单向链表快速排序">
-<meta name="twitter:description" content="简述单向链表快速排序与数组快速排序$^1$有所不同，关键部分中，数组快速排序有不断向前的下标访问，这种方式对于双向链表来说可行，但对于单向链表来说，每次访问都会导致大量解引用行为，因此需要对方案进行适度的修改。 单向链表快速排序有两种方案，改变值、改变指针，改变值的方案在节点结构体包含大量变量内容的情况下会造成性能大幅下降，故选择后者。   见《数据结构与算法分析——C语言描述（第二版）》177页">
+<meta name="twitter:title" content="Spark快速入门">
+<meta name="twitter:description" content="前言使用Docker在Mac上快速部署Spark运行环境，便于本地代码测试 安装 前提  Mac OS Docker    下载镜像 1docker pull akzk/spark_py34:mac  下载脚本 123wget https://github.com/akzk/dockerhub/archive/master.zipunzip master.zipcd dockerhub-maste">
 
 
 
@@ -132,13 +132,13 @@
 
 
 
-  <link rel="canonical" href="http://akzk.github.io/2017/07/25/单向链表快速排序/"/>
+  <link rel="canonical" href="http://akzk.github.io/2018/01/15/Spark入门/"/>
 
 
 
 
 
-  <title>单向链表快速排序 | akzk's blog</title>
+  <title>Spark快速入门 | akzk's blog</title>
   
 
 
@@ -267,7 +267,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://akzk.github.io/2017/07/25/单向链表快速排序/">
+    <link itemprop="mainEntityOfPage" href="http://akzk.github.io/2018/01/15/Spark入门/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="akzk">
@@ -284,7 +284,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">单向链表快速排序</h1>
+          <h1 class="post-title" itemprop="name headline">Spark快速入门</h1>
         
 
         <div class="post-meta">
@@ -296,8 +296,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-25T00:37:39+08:00">
-                2017-07-25
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-15T14:55:12+08:00">
+                2018-01-15
               </time>
             
 
@@ -306,28 +306,6 @@
             
           </span>
 
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/代码/" itemprop="url" rel="index">
-                    <span itemprop="name">代码</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -353,15 +331,39 @@
       
 
       
-        <h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>单向链表快速排序与数组快速排序$^1$有所不同，关键部分中，数组快速排序有不断向前的下标访问，这种方式对于双向链表来说可行，但对于单向链表来说，每次访问都会导致大量解引用行为，因此需要对方案进行适度的修改。</p>
-<p>单向链表快速排序有两种方案，改变值、改变指针，改变值的方案在节点结构体包含大量变量内容的情况下会造成性能大幅下降，故选择后者。</p>
-<blockquote>
-<ol>
-<li>见《数据结构与算法分析——C语言描述（第二版）》177页</li>
-</ol>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>使用Docker在Mac上快速部署Spark运行环境，便于本地代码测试</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
+<p>前提</p>
+<ul>
+<li>Mac OS</li>
+<li>Docker</li>
+</ul>
 </blockquote>
-<a id="more"></a>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>C语言实现见<a href="https://github.com/LeonardoCaesarZ/algorithm" target="_blank" rel="noopener">Github</a></p>
+<ol>
+<li><p>下载镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull akzk/spark_py34:mac</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>下载脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/akzk/dockerhub/archive/master.zip</span><br><span class="line">unzip master.zip</span><br><span class="line"><span class="built_in">cd</span> dockerhub-master/deploy/hadoop</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>部署</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash deploy.sh spark_py34</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash test.sh spark</span><br></pre></td></tr></table></figure>
+<p>若工作正常，输出中有一行文字为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pi is roughly 3.1426311426311426</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="第一个python程序"><a href="#第一个python程序" class="headerlink" title="第一个python程序"></a>第一个python程序</h3><ol>
+<li><p>编辑</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.sql <span class="keyword">import</span> SparkSession</span><br><span class="line"><span class="keyword">from</span> operator <span class="keyword">import</span> add</span><br><span class="line"></span><br><span class="line">spark = SparkSession \</span><br><span class="line">	.builder \</span><br><span class="line">	.appName(<span class="string">"word_count_app_1"</span>) \</span><br><span class="line">	.getOrCreate()</span><br><span class="line"></span><br><span class="line">lines = spark.read.text(<span class="string">"file:///usr/local/spark/README.md"</span>).rdd.map(<span class="keyword">lambda</span> r: r[<span class="number">0</span>])</span><br><span class="line">counts = lines.flatMap(<span class="keyword">lambda</span> x: x.split(<span class="string">' '</span>)) \</span><br><span class="line">	.map(<span class="keyword">lambda</span> x: (x, <span class="number">1</span>)) \</span><br><span class="line">  	.reduceByKey(add)</span><br><span class="line">output = counts.collect()</span><br><span class="line"><span class="keyword">for</span> (word, count) <span class="keyword">in</span> output:</span><br><span class="line">  	print(<span class="string">"%s: %d"</span> % (word, count))</span><br><span class="line">spark.stop()</span><br></pre></td></tr></table></figure>
+<p>保存至/root/test.py</p>
+</li>
+<li><p>运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spark-submit test.py</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
 
       
     </div>
@@ -391,7 +393,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/算法/" rel="tag"># 算法</a>
+            <a href="/tags/spark/" rel="tag"># spark</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
           
         </div>
       
@@ -404,8 +408,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/07/17/nginx动态模块开发-C-language/" rel="next" title="nginx动态模块开发(C language)">
-                <i class="fa fa-chevron-left"></i> nginx动态模块开发(C language)
+              <a href="/2017/12/10/docker-hadoop/" rel="next" title="使用Docker快速搭建Hadoop环境">
+                <i class="fa fa-chevron-left"></i> 使用Docker快速搭建Hadoop环境
               </a>
             
           </div>
@@ -413,10 +417,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/07/27/Sphinx全文检索/" rel="prev" title="Sphinx全文检索">
-                Sphinx全文检索 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -557,7 +557,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码"><span class="nav-number">2.</span> <span class="nav-text">代码</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行"><span class="nav-number">3.</span> <span class="nav-text">运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一个python程序"><span class="nav-number">3.1.</span> <span class="nav-text">第一个python程序</span></a></li></ol></li></ol></div>
             
 
           </div>
